@@ -7,7 +7,7 @@ export default class Arrow {
 
   constructor(canvas: SVGElement, x: number, y: number) {
     this.canvas = canvas;
-    this.el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    this.el = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.canvas.appendChild(this.el);
 
     this.x = x;
@@ -22,17 +22,20 @@ export default class Arrow {
   }) {
     const { el } = this;
 
-    const originX = this.x - (magnitude / 2);
-    const originY = this.y - (magnitude / 2);
-    el.setAttribute('transform', `translate(${originX}, ${originY})`);
-
     const degrees = direction * (180 / Math.PI);
 
+    const originX = this.x - (magnitude / 2);
+    el.setAttribute("stroke", "red");
+    el.setAttribute("stroke-width", "2");
+    el.setAttribute(
+      "transform",
+      `translate(${originX}, ${this.y}) rotate(${degrees} ${magnitude / 2} 0)`,
+    );
+
     el.innerHTML = `
-      <circle cx='0' cy='0' r='10' fill='green'></circle>
-      <g transform='rotate(${degrees})' stroke='red' stroke-width='2'>
-        <line x1='0' y1='0' x2='${magnitude}' y2='0'></line>
-      </g>
+      <line x1='0' y1='0' x2='${magnitude}' y2='0'></line>
+      <line x1='${magnitude}' y1='0' x2='${magnitude - 7}' y2='-5'></line>
+      <line x1='${magnitude}' y1='0' x2='${magnitude - 7}' y2='5'></line>
     `;
   }
 
