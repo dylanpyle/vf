@@ -1,10 +1,19 @@
 import Arrow from "./arrow";
+import slopeToRadians from "./slope-to-radians";
 
-const ARROW_SPACING = 50;
+const ARROW_SPACING = 30;
+
+interface Point {
+  logicalX: number;
+  logicalY: number;
+  physicalX: number;
+  physicalY: number;
+  arrow: Arrow;
+}
 
 class VFCanvas {
   private el: SVGElement;
-  private arrows: Arrow[][] = [];
+  private points: Point[] = [];
 
   constructor(el: SVGElement) {
     this.el = el;
@@ -14,13 +23,11 @@ class VFCanvas {
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    for (let x = 0; x < this.arrows.length; x++) {
-      for (let y = 0; y < this.arrows[x].length; y++) {
-        this.arrows[x][y].render({
-          magnitude: Math.min(event.clientX, ARROW_SPACING),
-          direction: event.clientY / 300,
-        });
-      }
+    for (const point of this.points) {
+      point.arrow.render({
+        magnitude: Math.min(event.clientX, ARROW_SPACING),
+        direction: event.clientY / 300,
+      });
     }
   };
 
@@ -29,32 +36,69 @@ class VFCanvas {
     this.setUpArrows();
   };
 
-  private setUpArrows() {
-    this.el.innerHTML += `
-      <line stroke='black' x1='250' y1='0' x2='250' y2='500' stroke-width='3' />
-      <line stroke='black' x1='0' y1='250' x2='500' y2='250' stroke-width='3' />
-    `;
+  // [[minX, minY], [maxX, maxY]]
+  private getLogicalBounds(): [[number, number], [number, number]] {
+    const { clientWidth, clientHeight } = this.el;
 
-    for (let x = 0; x < this.arrows.length; x++) {
-      for (let y = 0; y < this.arrows[x].length; y++) {
-        this.arrows[x][y].remove();
-      }
-    }
+    const aspectRatio = clientWidth / clientHeight;
 
-    this.arrows = [];
-
-    for (let x = 0; x < 10; x++) {
-      this.arrows[x] = [];
-
-      for (let y = 0; y < 10; y++) {
-        const a = new Arrow(this.el, ARROW_SPACING * x, ARROW_SPACING * y);
-        a.render({ magnitude: 10, direction: Math.PI / 4 });
-        this.arrows[x][y] = a;
-      }
-    }
+    return aspectRatio > 1
+      ? [[-1, -1 / aspectRatio], [1, 1 / aspectRatio]]
+      : [[aspectRatio / -1, -1], [aspectRatio / 1, 1]];
   }
 
-  private render() {
+  private setUpArrows() {
+    const [
+      [lMinX, lMinY],
+      [lMaxX, lMaxY],
+    ] = this.getLogicalBounds();
+
+    const [pMinX, pMinY] = [0, 0];
+    const [pMaxX, pMaxY] = [this.el.clientWidth, this.el.clientHeight];
+    const [pMidX, pMidY] = [(pMinX + pMaxX) / 2, (pMinY + pMaxY) / 2];
+
+    /*
+    this.el.innerHTML += `
+      <line stroke='white' x1='${pMidX}' y1='${pMinY}' x2='${pMidX}' y2='${pMaxY}' />
+      <line stroke='white' x1='${pMinX}' y1='${pMidY}' x2='${pMaxX}' y2='${pMidY}' />
+    `;
+    */
+
+    for (const point of this.points) {
+      point.arrow.remove();
+    }
+
+    this.points = [];
+
+    for (let physicalX = pMinX; physicalX < pMaxX; physicalX += ARROW_SPACING) {
+      for (
+        let physicalY = pMinY;
+        physicalY < pMaxY;
+        physicalY += ARROW_SPACING
+      ) {
+        const arrow = new Arrow(this.el, physicalX, physicalY);
+        const percentX = physicalX / pMaxX;
+        const percentY = physicalY / pMaxY;
+
+        const logicalX = lMinX + ((lMaxX - lMinX) * percentX);
+        const logicalY = lMinY + ((lMaxY - lMinY) * percentY);
+
+        arrow.render({
+          magnitude: ARROW_SPACING,
+          direction: slopeToRadians(logicalX, logicalY),
+        });
+
+        this.points.push({
+          arrow,
+          logicalX,
+          logicalY,
+          physicalX,
+          physicalY,
+        });
+      }
+    }
+
+    console.log(this.points);
   }
 }
 

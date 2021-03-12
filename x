@@ -36,6 +36,12 @@ dev() {
     --serve=localhost:8080
 }
 
+test() {
+  set +o noglob
+  deno test src/*.spec.ts
+  set -o noglob
+}
+
 (
   cd $(dirname "$0")
   "$@"
