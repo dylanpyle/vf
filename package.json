@@ -1,11 +1,9 @@
 {
-  "name": "web",
+  "name": "vf",
   "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
     "esbuild": "^0.8.56",
     "tslib": "^2.1.0"
   }
