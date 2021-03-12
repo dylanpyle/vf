@@ -56,9 +56,11 @@ export default class VFCanvas {
 
     const x = evaluate(this.xEquation);
     const y = evaluate(this.yEquation);
+    const magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) *
+      ARROW_SPACING;
 
     return {
-      magnitude: ARROW_SPACING,
+      magnitude,
       direction: slopeToRadians(x, y),
     };
   }
