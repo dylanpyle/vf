@@ -1,19 +1,35 @@
+![](https://i.imgur.com/NXF0bPL.png)
+
 # vf
 
 A vector field renderer.
 
-## Demo
+## Usage
 
 https://vector.demo.camp
 
-Provide equations (Vx, Vy) as query parameters.
+Supports the following query parameters:
+
+- `vx` - An equation for the X component of each vector
+- `vy` - An equation for the Y component of each vector
+- `l` - The size of each arrow in pixels
+
+`vx` and `vy` should generally return values in the 0-1 range.
+
+`l` can be any number, but it's best to stay above ~40px to achieve adequate
+performnace.
 
 Equations are evaluated as JavaScript (i.e. use `Math` functions as needed) [1] with
 access to the following variables:
 - `x`, `y` - The arrow's logical position (-1 to 1)
 - `mX`, `mY` - The current logical position of the cursor (-1 to 1)
+- `t` - A unit of time, which grows from 0-1 every 10 seconds
 
-e.g.: https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
+## Examples
+
+https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)&vy=5*x*y
+https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
+https://vector.demo.camp/?l=60&vx=(mX-x)/t&vy=(mY-y)/t
 
 ## Local Development
 

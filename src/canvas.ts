@@ -1,7 +1,5 @@
 import Arrow from "./arrow";
 
-const ARROW_SPACING = 60;
-
 const slopeToRadians = (x: number, y: number): number =>
   (Math.PI * 2) - Math.atan2(y, x);
 
@@ -13,11 +11,19 @@ interface Point {
   arrow: Arrow;
 }
 
+interface Options {
+  el: SVGElement;
+  vx: string;
+  vy: string;
+  arrowSpacing: number;
+}
+
 export default class VFCanvas {
   private el: SVGElement;
   private points: Point[] = [];
   private elWidth: number = 0;
   private elHeight: number = 0;
+  private arrowSpacing: number;
 
   private logicalMouseX: number = 0;
   private logicalMouseY: number = 0;
@@ -25,30 +31,27 @@ export default class VFCanvas {
   private xEquation: string;
   private yEquation: string;
 
-  constructor(el: SVGElement, vx: string, vy: string) {
+  constructor({ el, vx, vy, arrowSpacing }: Options) {
     this.el = el;
     this.xEquation = vx;
     this.yEquation = vy;
+    this.arrowSpacing = arrowSpacing;
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
     window.addEventListener("resize", this.onWindowResize);
     this.setUpArrows();
+    this.renderArrows();
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    requestAnimationFrame(
-      this.updateWithMousePosition.bind(this, event.clientX, event.clientY),
-    );
+    this.updateWithMousePosition(event.clientX, event.clientY);
   };
 
   private onTouchMove = (event: TouchEvent) => {
     event.preventDefault();
-    requestAnimationFrame(
-      this.updateWithMousePosition.bind(
-        this,
-        event.touches[0].clientX,
-        event.touches[0].clientY,
-      ),
+    this.updateWithMousePosition.bind(
+      event.touches[0].clientX,
+      event.touches[0].clientY,
     );
   };
 
@@ -56,19 +59,21 @@ export default class VFCanvas {
     point: Point,
   ): { magnitude: number; direction: number } {
     const evaluate = (equation: string): number => {
-      const f = new Function("x", "y", "mX", "mY", `return ${equation};`);
+      const time = (Date.now() / 10000) % 1;
+      const f = new Function("x", "y", "mX", "mY", "t", `return ${equation};`);
       return f(
         point.logicalX,
         point.logicalY,
         this.logicalMouseX,
         this.logicalMouseY,
+        time,
       );
     };
 
     const x = evaluate(this.xEquation);
     const y = evaluate(this.yEquation);
     const magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) *
-      ARROW_SPACING;
+      this.arrowSpacing;
 
     return {
       magnitude,
@@ -76,11 +81,13 @@ export default class VFCanvas {
     };
   }
 
-  private renderArrows() {
+  private renderArrows = () => {
     for (const point of this.points) {
       point.arrow.render(this.getArrowProperties(point));
     }
-  }
+
+    requestAnimationFrame(this.renderArrows);
+  };
 
   private updateWithMousePosition = (
     physicalMouseX: number,
@@ -92,7 +99,6 @@ export default class VFCanvas {
     );
     this.logicalMouseX = logicalMouseX;
     this.logicalMouseY = logicalMouseY;
-    this.renderArrows();
   };
 
   private onWindowResize = () => {
@@ -140,11 +146,13 @@ export default class VFCanvas {
     const [pMinX, pMinY] = [0, 0];
     const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
 
-    for (let physicalX = pMinX; physicalX < pMaxX; physicalX += ARROW_SPACING) {
+    for (
+      let physicalX = pMinX; physicalX < pMaxX; physicalX += this.arrowSpacing
+    ) {
       for (
         let physicalY = pMinY;
         physicalY < pMaxY;
-        physicalY += ARROW_SPACING
+        physicalY += this.arrowSpacing
       ) {
         const arrow = new Arrow(this.el, physicalX, physicalY);
         const [logicalX, logicalY] = this.physicalToLogical(
@@ -161,7 +169,5 @@ export default class VFCanvas {
         });
       }
     }
-
-    this.renderArrows();
   }
 }
