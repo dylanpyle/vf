@@ -4,7 +4,7 @@ A vector field renderer.
 
 ## Demo
 
-https://dylanpyle.github.io/vf/
+https://vector.demo.camp
 
 Provide equations (Vx, Vy) as query parameters.
 
@@ -13,7 +13,7 @@ access to the following variables:
 - `x`, `y` - The arrow's logical position (-1 to 1)
 - `mX`, `mY` - The current logical position of the cursor (-1 to 1)
 
-e.g.: https://dylanpyle.github.io/vf?vx=mX-x&vy=mY-y
+e.g.: https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
 
 ## Local Development
 
