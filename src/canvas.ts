@@ -1,6 +1,6 @@
 import Arrow from "./arrow";
 
-const ARROW_SPACING = 30;
+const ARROW_SPACING = 60;
 
 const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
 
