@@ -55,16 +55,15 @@ export default class VFCanvas {
   private getArrowProperties(
     point: Point,
   ): { magnitude: number; direction: number } {
-    const evaluate = (equation: string): number =>
-      eval(`
-      (function() {
-        const x = ${point.logicalX};
-        const y = ${point.logicalY};
-        const mX = ${this.logicalMouseX};
-        const mY = ${this.logicalMouseY};
-        return ${equation};
-      })();
-    `);
+    const evaluate = (equation: string): number => {
+      const f = new Function("x", "y", "mX", "mY", `return ${equation};`);
+      return f(
+        point.logicalX,
+        point.logicalY,
+        this.logicalMouseX,
+        this.logicalMouseY,
+      );
+    };
 
     const x = evaluate(this.xEquation);
     const y = evaluate(this.yEquation);
