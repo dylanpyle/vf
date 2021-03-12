@@ -2,7 +2,7 @@
 
 # vf
 
-A vector field renderer.
+A vector field playground.
 
 ## Usage
 
@@ -27,9 +27,17 @@ access to the following variables:
 
 ## Examples
 
+- https://vector.demo.camp/?l=100&vx=t/(mX-x)&vy=t/(mY-y)
 - https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)&vy=5*x*y
 - https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
-- https://vector.demo.camp/?l=60&vx=(mX-x)/t&vy=(mY-y)/t
+
+## Embedding in other documents
+
+— works exactly like you'd hope.
+
+```html
+<iframe src='https://vector.demo.camp/?l=20&vx=x&vy=y' height='500' width='500' />
+```
 
 ## Local Development
 
@@ -37,7 +45,7 @@ access to the following variables:
 
 deno, yarn
 
-### Usage 
+### Usage
 
 ```
 ./x dev
