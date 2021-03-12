@@ -48,6 +48,7 @@ publish() {
   git branch -D built
   git checkout -b built main
   cp -r dist docs
+  echo 'vector.demo.camp' > docs/CNAME
   git add docs
   git commit -m 'Add built copy'
   git push -f origin built
