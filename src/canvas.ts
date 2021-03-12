@@ -30,6 +30,7 @@ export default class VFCanvas {
     this.xEquation = vx;
     this.yEquation = vy;
     el.addEventListener("mousemove", this.onMouseMove);
+    el.addEventListener("touchmove", this.onTouchMove);
     window.addEventListener("resize", this.onWindowResize);
     this.setUpArrows();
   }
@@ -37,6 +38,17 @@ export default class VFCanvas {
   private onMouseMove = (event: MouseEvent) => {
     requestAnimationFrame(
       this.updateWithMousePosition.bind(this, event.clientX, event.clientY),
+    );
+  };
+
+  private onTouchMove = (event: TouchEvent) => {
+    event.preventDefault();
+    requestAnimationFrame(
+      this.updateWithMousePosition.bind(
+        this,
+        event.touches[0].clientX,
+        event.touches[0].clientY,
+      ),
     );
   };
 
