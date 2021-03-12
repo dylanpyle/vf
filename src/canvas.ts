@@ -2,7 +2,8 @@ import Arrow from "./arrow";
 
 const ARROW_SPACING = 60;
 
-const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
+const slopeToRadians = (x: number, y: number): number =>
+  (Math.PI * 2) - Math.atan2(y, x);
 
 interface Point {
   logicalX: number;
@@ -108,7 +109,7 @@ export default class VFCanvas {
     const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
 
     const percentX = physicalX / pMaxX;
-    const percentY = physicalY / pMaxY;
+    const percentY = 1 - (physicalY / pMaxY);
 
     const logicalX = lMinX + ((lMaxX - lMinX) * percentX);
     const logicalY = lMinY + ((lMaxY - lMinY) * percentY);
