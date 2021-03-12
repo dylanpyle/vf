@@ -42,6 +42,18 @@ test() {
   set -o noglob
 }
 
+publish() {
+  check
+  build
+  git branch -D built
+  git checkout -b built main
+  cp -r dist docs
+  git add docs
+  git commit -m 'Add built copy'
+  git push origin built
+  git checkout main
+}
+
 (
   cd $(dirname "$0")
   "$@"

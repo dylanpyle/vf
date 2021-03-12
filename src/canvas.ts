@@ -4,8 +4,8 @@ const ARROW_SPACING = 30;
 
 const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
 
-const equation1X = `Math.cos((y + mX) * 5)`;
-const equation1Y = `Math.sin((x + mY) * 5)`;
+const equation1X = `Math.cos((y - mY + 0.78) * 2)`;
+const equation1Y = `Math.sin((x - mX) * 2)`;
 
 interface Point {
   logicalX: number;
