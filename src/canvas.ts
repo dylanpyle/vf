@@ -147,7 +147,9 @@ export default class VFCanvas {
     const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
 
     for (
-      let physicalX = pMinX; physicalX < pMaxX; physicalX += this.arrowSpacing
+      let physicalX = pMinX;
+      physicalX < pMaxX;
+      physicalX += this.arrowSpacing
     ) {
       for (
         let physicalY = pMinY;
