@@ -12,7 +12,7 @@ Supports the following query parameters:
 
 - `vx` - An equation for the X component of each vector
 - `vy` - An equation for the Y component of each vector
-- `l` - The size of each arrow in pixels
+- `l` - The spacing betweeen each arrow, in pixels
 
 `vx` and `vy` should generally return values in the 0-1 range.
 
@@ -27,9 +27,9 @@ access to the following variables:
 
 ## Examples
 
-https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)&vy=5*x*y
-https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
-https://vector.demo.camp/?l=60&vx=(mX-x)/t&vy=(mY-y)/t
+- https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)&vy=5*x*y
+- https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
+- https://vector.demo.camp/?l=60&vx=(mX-x)/t&vy=(mY-y)/t
 
 ## Local Development
 
