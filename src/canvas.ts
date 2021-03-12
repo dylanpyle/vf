@@ -4,9 +4,6 @@ const ARROW_SPACING = 60;
 
 const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
 
-const equation1X = `Math.cos((y - mY + 0.78) * 2)`;
-const equation1Y = `Math.sin((x - mX) * 2)`;
-
 interface Point {
   logicalX: number;
   logicalY: number;
@@ -24,11 +21,13 @@ export default class VFCanvas {
   private logicalMouseX: number = 0;
   private logicalMouseY: number = 0;
 
-  private xEquation: string = equation1X;
-  private yEquation: string = equation1Y;
+  private xEquation: string;
+  private yEquation: string;
 
-  constructor(el: SVGElement) {
+  constructor(el: SVGElement, vx: string, vy: string) {
     this.el = el;
+    this.xEquation = vx;
+    this.yEquation = vy;
     el.addEventListener("mousemove", this.onMouseMove);
     window.addEventListener("resize", this.onWindowResize);
     this.setUpArrows();
