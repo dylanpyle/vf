@@ -50,7 +50,7 @@ publish() {
   cp -r dist docs
   git add docs
   git commit -m 'Add built copy'
-  git push origin built
+  git push -f origin built
   git checkout main
 }
 
