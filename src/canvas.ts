@@ -4,6 +4,9 @@ const ARROW_SPACING = 30;
 
 const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
 
+const equation1X = `Math.cos((y + mX) * 5)`;
+const equation1Y = `Math.sin((x + mY) * 5)`;
+
 interface Point {
   logicalX: number;
   logicalY: number;
@@ -18,6 +21,12 @@ export default class VFCanvas {
   private elWidth: number = 0;
   private elHeight: number = 0;
 
+  private logicalMouseX: number = 0;
+  private logicalMouseY: number = 0;
+
+  private xEquation: string = equation1X;
+  private yEquation: string = equation1Y;
+
   constructor(el: SVGElement) {
     this.el = el;
     el.addEventListener("mousemove", this.onMouseMove);
@@ -31,21 +40,46 @@ export default class VFCanvas {
     );
   };
 
-  private updateWithMousePosition = (mouseX: number, mouseY: number) => {
-    for (const point of this.points) {
-      const distance = Math.sqrt(
-        Math.pow(mouseX - point.physicalX, 2) +
-          Math.pow(mouseY - point.physicalY, 2),
-      );
+  private getArrowProperties(
+    point: Point,
+  ): { magnitude: number; direction: number } {
+    const evaluate = (equation: string): number =>
+      eval(`
+      (function() {
+        const x = ${point.logicalX};
+        const y = ${point.logicalY};
+        const mX = ${this.logicalMouseX};
+        const mY = ${this.logicalMouseY};
+        return ${equation};
+      })();
+    `);
 
-      point.arrow.render({
-        magnitude: (distance / this.elWidth) * ARROW_SPACING,
-        direction: slopeToRadians(
-          mouseX - point.physicalX,
-          mouseY - point.physicalY,
-        ),
-      });
+    const x = evaluate(this.xEquation);
+    const y = evaluate(this.yEquation);
+
+    return {
+      magnitude: ARROW_SPACING,
+      direction: slopeToRadians(x, y),
+    };
+  }
+
+  private renderArrows() {
+    for (const point of this.points) {
+      point.arrow.render(this.getArrowProperties(point));
     }
+  }
+
+  private updateWithMousePosition = (
+    physicalMouseX: number,
+    physicalMouseY: number,
+  ) => {
+    const [logicalMouseX, logicalMouseY] = this.physicalToLogical(
+      physicalMouseX,
+      physicalMouseY,
+    );
+    this.logicalMouseX = logicalMouseX;
+    this.logicalMouseY = logicalMouseY;
+    this.renderArrows();
   };
 
   private onWindowResize = () => {
@@ -61,23 +95,37 @@ export default class VFCanvas {
       : [[aspectRatio / -1, -1], [aspectRatio / 1, 1]];
   }
 
-  private setUpArrows() {
-    this.elWidth = this.el.clientWidth;
-    this.elHeight = this.el.clientHeight;
-
+  private physicalToLogical(
+    physicalX: number,
+    physicalY: number,
+  ): [number, number] {
     const [
       [lMinX, lMinY],
       [lMaxX, lMaxY],
     ] = this.getLogicalBounds();
 
-    const [pMinX, pMinY] = [0, 0];
     const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
+
+    const percentX = physicalX / pMaxX;
+    const percentY = physicalY / pMaxY;
+
+    const logicalX = lMinX + ((lMaxX - lMinX) * percentX);
+    const logicalY = lMinY + ((lMaxY - lMinY) * percentY);
+    return [logicalX, logicalY];
+  }
+
+  private setUpArrows() {
+    this.elWidth = this.el.clientWidth;
+    this.elHeight = this.el.clientHeight;
 
     for (const point of this.points) {
       point.arrow.remove();
     }
 
     this.points = [];
+
+    const [pMinX, pMinY] = [0, 0];
+    const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
 
     for (let physicalX = pMinX; physicalX < pMaxX; physicalX += ARROW_SPACING) {
       for (
@@ -86,16 +134,10 @@ export default class VFCanvas {
         physicalY += ARROW_SPACING
       ) {
         const arrow = new Arrow(this.el, physicalX, physicalY);
-        const percentX = physicalX / pMaxX;
-        const percentY = physicalY / pMaxY;
-
-        const logicalX = lMinX + ((lMaxX - lMinX) * percentX);
-        const logicalY = lMinY + ((lMaxY - lMinY) * percentY);
-
-        arrow.render({
-          magnitude: ARROW_SPACING,
-          direction: slopeToRadians(logicalX, logicalY),
-        });
+        const [logicalX, logicalY] = this.physicalToLogical(
+          physicalX,
+          physicalY,
+        );
 
         this.points.push({
           arrow,
@@ -106,5 +148,7 @@ export default class VFCanvas {
         });
       }
     }
+
+    this.renderArrows();
   }
 }
