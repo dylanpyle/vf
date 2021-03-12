@@ -1,7 +1,8 @@
 import Arrow from "./arrow";
-import slopeToRadians from "./slope-to-radians";
 
 const ARROW_SPACING = 30;
+
+const slopeToRadians = (x: number, y: number): number => Math.atan2(y, x);
 
 interface Point {
   logicalX: number;
@@ -14,6 +15,8 @@ interface Point {
 class VFCanvas {
   private el: SVGElement;
   private points: Point[] = [];
+  private elWidth: number = 0;
+  private elHeight: number = 0;
 
   constructor(el: SVGElement) {
     this.el = el;
@@ -23,24 +26,31 @@ class VFCanvas {
   }
 
   private onMouseMove = (event: MouseEvent) => {
+    const { clientX, clientY } = event;
+
     for (const point of this.points) {
+      const distance = Math.sqrt(
+        Math.pow(clientX - point.physicalX, 2) +
+          Math.pow(clientY - point.physicalY, 2),
+      );
+
       point.arrow.render({
-        magnitude: Math.min(event.clientX, ARROW_SPACING),
-        direction: event.clientY / 300,
+        magnitude: (distance / this.elWidth) * ARROW_SPACING,
+        direction: slopeToRadians(
+          clientX - point.physicalX,
+          clientY - point.physicalY,
+        ),
       });
     }
   };
 
-  private onWindowResize = (event: UIEvent) => {
-    console.log(event);
+  private onWindowResize = () => {
     this.setUpArrows();
   };
 
   // [[minX, minY], [maxX, maxY]]
   private getLogicalBounds(): [[number, number], [number, number]] {
-    const { clientWidth, clientHeight } = this.el;
-
-    const aspectRatio = clientWidth / clientHeight;
+    const aspectRatio = this.elWidth / this.elHeight;
 
     return aspectRatio > 1
       ? [[-1, -1 / aspectRatio], [1, 1 / aspectRatio]]
@@ -48,21 +58,16 @@ class VFCanvas {
   }
 
   private setUpArrows() {
+    this.elWidth = this.el.clientWidth;
+    this.elHeight = this.el.clientHeight;
+
     const [
       [lMinX, lMinY],
       [lMaxX, lMaxY],
     ] = this.getLogicalBounds();
 
     const [pMinX, pMinY] = [0, 0];
-    const [pMaxX, pMaxY] = [this.el.clientWidth, this.el.clientHeight];
-    const [pMidX, pMidY] = [(pMinX + pMaxX) / 2, (pMinY + pMaxY) / 2];
-
-    /*
-    this.el.innerHTML += `
-      <line stroke='white' x1='${pMidX}' y1='${pMinY}' x2='${pMidX}' y2='${pMaxY}' />
-      <line stroke='white' x1='${pMinX}' y1='${pMidY}' x2='${pMaxX}' y2='${pMidY}' />
-    `;
-    */
+    const [pMaxX, pMaxY] = [this.elWidth, this.elHeight];
 
     for (const point of this.points) {
       point.arrow.remove();
@@ -97,8 +102,6 @@ class VFCanvas {
         });
       }
     }
-
-    console.log(this.points);
   }
 }
 
