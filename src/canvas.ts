@@ -49,7 +49,7 @@ export default class VFCanvas {
 
   private onTouchMove = (event: TouchEvent) => {
     event.preventDefault();
-    this.updateWithMousePosition.bind(
+    this.updateWithMousePosition(
       event.touches[0].clientX,
       event.touches[0].clientY,
     );
