@@ -1,8 +1,8 @@
 import VFCanvas from "./canvas";
 
-const svg = document.querySelector(".app-canvas") as SVGElement;
+const canvas = document.querySelector(".app-canvas") as HTMLCanvasElement;
 
-if (!svg) {
+if (!canvas) {
   throw new Error("Missing .app-canvas element");
 }
 
@@ -14,7 +14,7 @@ const lValue = params.get("l");
 const arrowSpacing = lValue ? parseInt(lValue, 10) : 40;
 
 new VFCanvas({
-  el: svg,
+  el: canvas,
   vx,
   vy,
   arrowSpacing,

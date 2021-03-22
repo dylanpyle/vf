@@ -5,14 +5,6 @@ set -o nounset
 set -o pipefail
 set -o noglob
 
-format() {
-  deno fmt src
-}
-
-check() {
-  deno fmt src --check
-}
-
 _set_up_dist() {
   set +o noglob
   mkdir -p dist
@@ -20,12 +12,20 @@ _set_up_dist() {
   set -o noglob
 }
 
-build() {
+cmd:format() {
+  deno fmt src
+}
+
+cmd:check() {
+  deno fmt src --check
+}
+
+cmd:build() {
   _set_up_dist
   yarn run esbuild src/index.ts --bundle --minify --outfile=dist/index.js
 }
 
-dev() {
+cmd:dev() {
   _set_up_dist
 
   yarn run esbuild src/index.ts \
@@ -36,13 +36,13 @@ dev() {
     --serve=localhost:8080
 }
 
-test() {
+cmd:test() {
   set +o noglob
   deno test src/*.spec.ts
   set -o noglob
 }
 
-publish() {
+cmd:publish() {
   check
   build
   git branch -D built
@@ -57,5 +57,5 @@ publish() {
 
 (
   cd $(dirname "$0")
-  "$@"
+  "cmd:$@"
 )
