@@ -1,14 +1,25 @@
+interface Options {
+  ctx: CanvasRenderingContext2D;
+  x: number;
+  y: number;
+  color: string;
+  showArrow: boolean;
+}
+
 export default class Arrow {
   private ctx: CanvasRenderingContext2D;
-
   private x: number;
   private y: number;
+  private color: string;
+  private showArrow: boolean;
 
-  constructor(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  constructor({ ctx, x, y, color, showArrow }: Options) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
+    this.color = color;
+    this.showArrow = showArrow;
   }
 
   public render({ magnitude, direction }: {
@@ -25,15 +36,18 @@ export default class Arrow {
 
     ctx.beginPath();
 
-    ctx.moveTo(originX, 0);
+    ctx.lineTo(originX, 0);
     ctx.lineTo(endX, 0);
 
-    ctx.lineTo(endX - 7, -3);
-    ctx.moveTo(endX, 0);
-    ctx.lineTo(endX - 7, 3);
+    if (this.showArrow) {
+      ctx.moveTo(endX, 0);
+      ctx.lineTo(endX - 7, -3);
+      ctx.moveTo(endX, 0);
+      ctx.lineTo(endX - 7, 3);
+    }
 
     ctx.closePath();
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = this.color;
     ctx.stroke();
 
     // Reset transformation

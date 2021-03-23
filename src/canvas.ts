@@ -11,11 +11,16 @@ interface Point {
   arrow: Arrow;
 }
 
+export type Style = "ARROW" | "LINE";
+
 interface Options {
   el: HTMLCanvasElement;
   vx: string;
   vy: string;
   arrowSpacing: number;
+  backgroundColor: string;
+  foregroundColor: string;
+  style: Style;
 }
 
 export default class VFCanvas {
@@ -23,6 +28,10 @@ export default class VFCanvas {
   private ctx: CanvasRenderingContext2D;
   private width: number;
   private height: number;
+
+  private backgroundColor: string;
+  private foregroundColor: string;
+  private style: Style;
 
   private points: Point[] = [];
   private arrowSpacing: number;
@@ -33,11 +42,17 @@ export default class VFCanvas {
   private xEquation: string;
   private yEquation: string;
 
-  constructor({ el, vx, vy, arrowSpacing }: Options) {
+  constructor(
+    { el, vx, vy, arrowSpacing, foregroundColor, backgroundColor, style }:
+      Options,
+  ) {
     this.el = el;
     const ctx = el.getContext("2d");
     this.width = this.el.clientWidth;
     this.height = this.el.clientHeight;
+    this.backgroundColor = backgroundColor;
+    this.foregroundColor = foregroundColor;
+    this.style = style;
 
     if (!ctx) {
       throw new Error("Could not get canvas context");
@@ -47,6 +62,8 @@ export default class VFCanvas {
     this.xEquation = vx;
     this.yEquation = vy;
     this.arrowSpacing = arrowSpacing;
+
+    ctx.fillStyle = this.backgroundColor;
 
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
@@ -95,7 +112,7 @@ export default class VFCanvas {
   }
 
   private render = () => {
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    this.ctx.fillRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
       point.arrow.render(this.getArrowProperties(point));
@@ -174,7 +191,13 @@ export default class VFCanvas {
         physicalY < pMaxY;
         physicalY += this.arrowSpacing
       ) {
-        const arrow = new Arrow(this.ctx, physicalX, physicalY);
+        const arrow = new Arrow({
+          ctx: this.ctx,
+          x: physicalX,
+          y: physicalY,
+          color: this.foregroundColor,
+          showArrow: this.style === "ARROW",
+        });
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,
           physicalY,
