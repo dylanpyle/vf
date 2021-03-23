@@ -38,9 +38,6 @@ export default class Arrow {
 
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-  }
-
-  public remove() {
-    // noop
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
   }
 }

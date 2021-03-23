@@ -21,6 +21,8 @@ interface Options {
 export default class VFCanvas {
   private el: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private width: number;
+  private height: number;
 
   private points: Point[] = [];
   private arrowSpacing: number;
@@ -34,6 +36,8 @@ export default class VFCanvas {
   constructor({ el, vx, vy, arrowSpacing }: Options) {
     this.el = el;
     const ctx = el.getContext("2d");
+    this.width = this.el.clientWidth;
+    this.height = this.el.clientHeight;
 
     if (!ctx) {
       throw new Error("Could not get canvas context");
@@ -43,11 +47,13 @@ export default class VFCanvas {
     this.xEquation = vx;
     this.yEquation = vy;
     this.arrowSpacing = arrowSpacing;
+
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
     window.addEventListener("resize", this.onWindowResize);
-    this.setUpArrows();
-    this.renderArrows();
+
+    this.setUpScene();
+    this.render();
   }
 
   private onMouseMove = (event: MouseEvent) => {
@@ -88,14 +94,14 @@ export default class VFCanvas {
     };
   }
 
-  private renderArrows = () => {
-    this.ctx.clearRect(0, 0, this.el.width, this.el.height);
+  private render = () => {
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
       point.arrow.render(this.getArrowProperties(point));
     }
 
-    requestAnimationFrame(this.renderArrows);
+    requestAnimationFrame(this.render);
   };
 
   private updateWithMousePosition = (
@@ -111,12 +117,12 @@ export default class VFCanvas {
   };
 
   private onWindowResize = () => {
-    this.setUpArrows();
+    this.setUpScene();
   };
 
   // [[minX, minY], [maxX, maxY]]
   private getLogicalBounds(): [[number, number], [number, number]] {
-    const aspectRatio = this.el.width / this.el.height;
+    const aspectRatio = this.width / this.height;
 
     return aspectRatio > 1
       ? [[-1, -1 / aspectRatio], [1, 1 / aspectRatio]]
@@ -132,7 +138,7 @@ export default class VFCanvas {
       [lMaxX, lMaxY],
     ] = this.getLogicalBounds();
 
-    const [pMaxX, pMaxY] = [this.el.width, this.el.height];
+    const [pMaxX, pMaxY] = [this.width, this.height];
 
     const percentX = physicalX / pMaxX;
     const percentY = 1 - (physicalY / pMaxY);
@@ -142,18 +148,21 @@ export default class VFCanvas {
     return [logicalX, logicalY];
   }
 
-  private setUpArrows() {
-    this.el.width = this.el.clientWidth * window.devicePixelRatio;
-    this.el.height = this.el.clientHeight * window.devicePixelRatio;
+  private setUpScene() {
+    this.width = this.el.clientWidth;
+    this.height = this.el.clientHeight;
 
-    for (const point of this.points) {
-      point.arrow.remove();
-    }
+    const scale = window.devicePixelRatio;
+
+    this.el.width = this.width * scale;
+    this.el.height = this.height * scale;
+
+    this.ctx.scale(scale, scale);
 
     this.points = [];
 
     const [pMinX, pMinY] = [0, 0];
-    const [pMaxX, pMaxY] = [this.el.width, this.el.height];
+    const [pMaxX, pMaxY] = [this.width, this.height];
 
     for (
       let physicalX = pMinX;
