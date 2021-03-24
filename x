@@ -43,8 +43,8 @@ cmd:test() {
 }
 
 cmd:publish() {
-  check
-  build
+  cmd:check
+  cmd:build
   git branch -D built
   git checkout -b built main
   cp -r dist docs
