@@ -4,6 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 set -o noglob
+set -o xtrace
 
 _set_up_dist() {
   set +o noglob
@@ -45,7 +46,7 @@ cmd:test() {
 cmd:publish() {
   cmd:check
   cmd:build
-  git branch -D built
+  git branch -D built || true
   git checkout -b built main
   cp -r dist docs
   echo 'vector.demo.camp' > docs/CNAME
