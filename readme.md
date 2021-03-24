@@ -31,8 +31,11 @@ Supports the following optional query parameters:
 - `edit` — if `true`, show the editor form
   - Form also shows if no query params are provided.
 
+## Writing Equations
+
 Equations are evaluated as JavaScript (i.e. use `Math` functions as needed) [1] with
 access to the following variables:
+
 - `x`, `y` - The arrow's logical position (-1 to 1)
 - `mX`, `mY` - The current logical position of the cursor (-1 to 1)
 - `t` - A unit of time, which grows from 0-1 every 10 seconds
