@@ -63,8 +63,6 @@ export default class VFCanvas {
     this.yEquation = vy;
     this.arrowSpacing = arrowSpacing;
 
-    ctx.fillStyle = this.backgroundColor;
-
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
     window.addEventListener("resize", this.onWindowResize);
@@ -112,6 +110,7 @@ export default class VFCanvas {
   }
 
   private render = () => {
+    this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
