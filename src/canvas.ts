@@ -11,7 +11,7 @@ interface Point {
   arrow: Arrow;
 }
 
-export type Style = "ARROW" | "LINE";
+export type Type = "ARROW" | "LINE";
 
 interface Options {
   el: HTMLCanvasElement;
@@ -20,7 +20,7 @@ interface Options {
   arrowSpacing: number;
   backgroundColor: string;
   foregroundColor: string;
-  style: Style;
+  type: Type;
 }
 
 export default class VFCanvas {
@@ -31,7 +31,7 @@ export default class VFCanvas {
 
   private backgroundColor: string;
   private foregroundColor: string;
-  private style: Style;
+  private type: Type;
 
   private points: Point[] = [];
   private arrowSpacing: number;
@@ -43,7 +43,7 @@ export default class VFCanvas {
   private yEquation: string;
 
   constructor(
-    { el, vx, vy, arrowSpacing, foregroundColor, backgroundColor, style }:
+    { el, vx, vy, arrowSpacing, foregroundColor, backgroundColor, type }:
       Options,
   ) {
     this.el = el;
@@ -52,7 +52,7 @@ export default class VFCanvas {
     this.height = this.el.clientHeight;
     this.backgroundColor = backgroundColor;
     this.foregroundColor = foregroundColor;
-    this.style = style;
+    this.type = type;
 
     if (!ctx) {
       throw new Error("Could not get canvas context");
@@ -195,7 +195,7 @@ export default class VFCanvas {
           x: physicalX,
           y: physicalY,
           color: this.foregroundColor,
-          showArrow: this.style === "ARROW",
+          showArrow: this.type === "ARROW",
         });
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,

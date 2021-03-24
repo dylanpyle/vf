@@ -26,8 +26,10 @@ Supports the following optional query parameters:
 - `bg` — The foreground color
   - default: `#000`
   - e.g. `bg=%2300ffff`, or `bg=cyan`
-- `style` — The type of stroke to draw (`ARROW` or `LINE`)
+- `type` — The type of stroke to draw (`ARROW` or `LINE`)
   - default: `ARROW`
+- `edit` — if `true`, show the editor form
+  - Form also shows if no query params are provided.
 
 Equations are evaluated as JavaScript (i.e. use `Math` functions as needed) [1] with
 access to the following variables:
@@ -40,7 +42,7 @@ access to the following variables:
 - https://vector.demo.camp/?l=100&vx=t/(mX-x)&vy=t/(mY-y)
 - https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)&vy=5*x*y
 - https://vector.demo.camp/?vx=Math.pow(x%2C2)-Math.pow(y%2C2)*4%2BmY&vy=2*x%2By%2BmX
-- https://vector.demo.camp/?fg=magenta&style=LINE
+- https://vector.demo.camp/?fg=magenta&type=LINE
 
 ## Embedding in other documents
 

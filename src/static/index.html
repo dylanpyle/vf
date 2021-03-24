@@ -7,6 +7,45 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
   </head>
   <body>
+    <form class='config-form' action='/'>
+      <label>
+        <div class='label-text'>vX:</div>
+        <input type='text' placeholder='mX-x' name='vx' />
+      </label>
+
+      <label>
+        <div class='label-text'>vY:</div>
+        <input type='text' placeholder='mY-y' name='vy' />
+      </label>
+
+      <label>
+        <div class='label-text'>Background:</div>
+        <input type='text' placeholder='black' name='bg' />
+      </label>
+
+      <label>
+        <div class='label-text'>Foreground:</div>
+        <input type='text' placeholder='white' name='fg' />
+      </label>
+
+      <label>
+        <div class='label-text'>Arrow spacing:</div>
+        <input type='number' placeholder='40' name='l' />
+      </label>
+
+      <label>
+        <div class='label-text'>Style:</div>
+        <select name='type' value='ARROW'>
+          <option value='ARROW'>Arrow</option>
+          <option value='LINE'>Line</option>
+        </select>
+      </label>
+
+      <input type='hidden' name='edit' value='true' />
+
+      <button type='submit'>Update</button>
+    </form>
+
     <canvas class='app-canvas'></canvas>
     <script src='index.js'></script>
   </body>
