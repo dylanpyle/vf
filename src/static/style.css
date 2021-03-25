@@ -31,15 +31,15 @@ body, input, select, button {
   display: none;
 }
 
-.config-form label {
+label {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 5px;
 }
 
-input, select {
-  width: 150px;
+input, select, button {
+  width: 120px;
 }
 
 input, select, button {
@@ -48,13 +48,27 @@ input, select, button {
   border: 1px solid #ccc;
 }
 
+input[type=color] {
+  padding: 0px 2px;
+}
+
 button {
   display: block;
-  width: 100%;
   background: #eee;
   border: none;
 }
 
 .label-text {
   margin-right: 20px;
+}
+
+.actions {
+  margin: 10px -5px 0 -5px;
+  padding: 0;
+  border: none;
+  display: flex;
+}
+
+.actions button {
+  margin: 0 5px;
 }

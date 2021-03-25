@@ -6,7 +6,7 @@ set -o pipefail
 set -o noglob
 set -o xtrace
 
-_set_up_dist() {
+cmd:copy_static() {
   set +o noglob
   mkdir -p dist
   cp -r src/static/* dist
@@ -22,12 +22,21 @@ cmd:check() {
 }
 
 cmd:build() {
-  _set_up_dist
+  cmd:copy_static
   yarn run esbuild src/index.ts --bundle --minify --outfile=dist/index.js
 }
 
+_stop_fswatch() {
+  kill $FSWATCH_PID
+}
+
 cmd:dev() {
-  _set_up_dist
+  cmd:copy_static
+
+
+  trap _stop_fswatch ERR
+  fswatch -o src/static | xargs -n1 ./x copy_static &
+  FSWATCH_PID=$!
 
   yarn run esbuild src/index.ts \
     --servedir=dist \

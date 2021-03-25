@@ -59,7 +59,9 @@ access to the following variables:
 
 ### Prerequisites
 
-deno, yarn
+- [yarn](https://classic.yarnpkg.com/en/) (for esbuild)
+- [deno](https://deno.land/) (for tooling)
+- [fswatch](https://github.com/emcrisostomo/fswatch#getting-fswatch) (for dev server)
 
 ### Usage
 

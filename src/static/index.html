@@ -26,12 +26,12 @@
 
       <label>
         <div class='label-text'>Background:</div>
-        <input type='text' placeholder='black' name='bg' />
+        <input type='color' name='bg' value='#000000' />
       </label>
 
       <label>
         <div class='label-text'>Foreground:</div>
-        <input type='text' placeholder='white' name='fg' />
+        <input type='color' name='fg' value='#ffffff' />
       </label>
 
       <label>
@@ -47,9 +47,10 @@
         </select>
       </label>
 
-      <input type='hidden' name='edit' value='true' />
-
-      <button type='submit'>Update</button>
+      <fieldset class='actions'>
+        <button name='edit' value='true' type='submit'>Update</button>
+        <button name='edit' value='false' type='submit' class='done-button'>Done</button>
+      </fieldset>
     </form>
 
     <canvas class='app-canvas'></canvas>
