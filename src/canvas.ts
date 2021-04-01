@@ -1,7 +1,20 @@
 import Arrow from "./arrow";
 
-const slopeToRadians = (x: number, y: number): number =>
-  (Math.PI * 2) - Math.atan2(y, x);
+function slopeToRadians (x: number, y: number): number {
+  return (Math.PI * 2) - Math.atan2(y, x);
+}
+
+function compact<T = {}> (obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    const value = obj[key];
+    if (value !== undefined) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
 
 interface Point {
   logicalX: number;
@@ -14,14 +27,26 @@ interface Point {
 export type Type = "ARROW" | "LINE";
 
 interface Options {
-  el: HTMLCanvasElement;
-  vx: string;
-  vy: string;
+  xEquation: string;
+  yEquation: string;
   arrowSpacing: number;
   backgroundColor: string;
   foregroundColor: string;
   type: Type;
+
+  // [[X%, Y%], [X%, Y%]]
+  viewBox: [[number, number], [number, number]];
 }
+
+const defaultOptions: Options = {
+  xEquation: "Math.cos((y - mY + 0.78) * 2)",
+  yEquation: "Math.sin((x - mX) * 2)",
+  backgroundColor: "#000",
+  foregroundColor: "#fff",
+  type: "ARROW",
+  arrowSpacing: 40,
+  viewBox: [[0, 0], [100, 100]]
+};
 
 export default class VFCanvas {
   private el: HTMLCanvasElement;
@@ -29,39 +54,32 @@ export default class VFCanvas {
   private width: number;
   private height: number;
 
-  private backgroundColor: string;
-  private foregroundColor: string;
-  private type: Type;
-
   private points: Point[] = [];
-  private arrowSpacing: number;
 
   private logicalMouseX: number = 0;
   private logicalMouseY: number = 0;
 
-  private xEquation: string;
-  private yEquation: string;
+  private options: Options;
 
   constructor(
-    { el, vx, vy, arrowSpacing, foregroundColor, backgroundColor, type }:
-      Options,
+    el: HTMLCanvasElement,
+    options: Partial<Options>
   ) {
     this.el = el;
-    const ctx = el.getContext("2d");
     this.width = this.el.clientWidth;
     this.height = this.el.clientHeight;
-    this.backgroundColor = backgroundColor;
-    this.foregroundColor = foregroundColor;
-    this.type = type;
 
+    this.options = {
+      ...compact(options),
+      ...defaultOptions
+    };
+
+    const ctx = el.getContext("2d");
     if (!ctx) {
       throw new Error("Could not get canvas context");
     }
 
     this.ctx = ctx;
-    this.xEquation = vx;
-    this.yEquation = vy;
-    this.arrowSpacing = arrowSpacing;
 
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
@@ -98,10 +116,10 @@ export default class VFCanvas {
       );
     };
 
-    const x = evaluate(this.xEquation);
-    const y = evaluate(this.yEquation);
+    const x = evaluate(this.options.xEquation);
+    const y = evaluate(this.options.yEquation);
     const magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) *
-      this.arrowSpacing;
+      this.options.arrowSpacing;
 
     return {
       magnitude,
@@ -110,14 +128,14 @@ export default class VFCanvas {
   }
 
   private render = () => {
-    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillStyle = this.options.backgroundColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
       point.arrow.render(this.getArrowProperties(point));
     }
 
-    requestAnimationFrame(this.render);
+    //requestAnimationFrame(this.render);
   };
 
   private updateWithMousePosition = (
@@ -177,25 +195,28 @@ export default class VFCanvas {
 
     this.points = [];
 
-    const [pMinX, pMinY] = [0, 0];
-    const [pMaxX, pMaxY] = [this.width, this.height];
+    const { viewBox, arrowSpacing, foregroundColor, type } = this.options;
+    const [[minXPercent, minYPercent], [maxXPercent, maxYPercent]] = viewBox;
+
+    const [pMinX, pMinY] = [minXPercent * this.width, minYPercent * this.height];
+    const [pMaxX, pMaxY] = [maxXPercent * this.width, maxYPercent * this.height];
 
     for (
       let physicalX = pMinX;
       physicalX < pMaxX;
-      physicalX += this.arrowSpacing
+      physicalX += arrowSpacing
     ) {
       for (
         let physicalY = pMinY;
         physicalY < pMaxY;
-        physicalY += this.arrowSpacing
+        physicalY += arrowSpacing
       ) {
         const arrow = new Arrow({
           ctx: this.ctx,
           x: physicalX,
           y: physicalY,
-          color: this.foregroundColor,
-          showArrow: this.type === "ARROW",
+          color: foregroundColor,
+          showArrow: type === "ARROW",
         });
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,
