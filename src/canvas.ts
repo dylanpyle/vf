@@ -30,6 +30,7 @@ interface Options {
   xEquation: string;
   yEquation: string;
   arrowSpacing: number;
+  arrowStroke: number;
   backgroundColor: string;
   foregroundColor: string;
   type: Type;
@@ -45,6 +46,7 @@ const defaultOptions: Options = {
   foregroundColor: "#fff",
   type: "ARROW",
   arrowSpacing: 40,
+  arrowStroke: 1,
   viewBox: [[0, 0], [100, 100]]
 };
 
@@ -70,8 +72,8 @@ export default class VFCanvas {
     this.height = this.el.clientHeight;
 
     this.options = {
-      ...compact(options),
-      ...defaultOptions
+      ...defaultOptions,
+      ...compact(options)
     };
 
     const ctx = el.getContext("2d");
@@ -135,7 +137,7 @@ export default class VFCanvas {
       point.arrow.render(this.getArrowProperties(point));
     }
 
-    //requestAnimationFrame(this.render);
+    requestAnimationFrame(this.render);
   };
 
   private updateWithMousePosition = (
@@ -195,11 +197,13 @@ export default class VFCanvas {
 
     this.points = [];
 
-    const { viewBox, arrowSpacing, foregroundColor, type } = this.options;
+    const { viewBox, arrowSpacing, foregroundColor, type, arrowStroke } = this.options;
     const [[minXPercent, minYPercent], [maxXPercent, maxYPercent]] = viewBox;
 
-    const [pMinX, pMinY] = [minXPercent * this.width, minYPercent * this.height];
-    const [pMaxX, pMaxY] = [maxXPercent * this.width, maxYPercent * this.height];
+    const [pMinX, pMinY] = [(minXPercent / 100) * this.width, (minYPercent / 100) * this.height];
+    const [pMaxX, pMaxY] = [(maxXPercent / 100) * this.width, (maxYPercent / 100) * this.height];
+
+    console.log({ pMinX, pMinY, pMaxX, pMaxY, viewBox });
 
     for (
       let physicalX = pMinX;
@@ -217,6 +221,7 @@ export default class VFCanvas {
           y: physicalY,
           color: foregroundColor,
           showArrow: type === "ARROW",
+          strokeWidth: arrowStroke
         });
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,

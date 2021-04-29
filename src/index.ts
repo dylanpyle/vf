@@ -37,9 +37,11 @@ try {
     xEquation: getParam('vx'),
     yEquation: getParam('vy'),
     arrowSpacing: getNumericParam('l'),
-    foregroundColor: getParam('bg'),
-    backgroundColor: getParam('fg'),
-    type: getParam('type') as Type | undefined
+    foregroundColor: getParam('fg'),
+    backgroundColor: getParam('bg'),
+    type: getParam('type') as Type | undefined,
+    viewBox: [[30,30],[70, 70]],
+    arrowStroke: 1.2
   });
 } catch (err) {
   alert(err.message);

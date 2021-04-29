@@ -4,6 +4,7 @@ interface Options {
   y: number;
   color: string;
   showArrow: boolean;
+  strokeWidth: number;
 }
 
 export default class Arrow {
@@ -12,14 +13,16 @@ export default class Arrow {
   private y: number;
   private color: string;
   private showArrow: boolean;
+  private strokeWidth: number;
 
-  constructor({ ctx, x, y, color, showArrow }: Options) {
+  constructor({ ctx, x, y, color, showArrow, strokeWidth }: Options) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
     this.color = color;
     this.showArrow = showArrow;
+    this.strokeWidth = strokeWidth;
   }
 
   public render({ magnitude, direction }: {
@@ -48,6 +51,7 @@ export default class Arrow {
 
     ctx.closePath();
     ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.strokeWidth;
     ctx.stroke();
 
     // Reset transformation
