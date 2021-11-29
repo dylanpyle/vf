@@ -1,26 +1,51 @@
-import Arrow from "./arrow";
-
-const slopeToRadians = (x: number, y: number): number =>
-  (Math.PI * 2) - Math.atan2(y, x);
+import Arrow from "./points/arrow";
+import Line from "./points/line";
+import Dot from "./points/dot";
+import Debug from "./points/debug";
+import {
+  PointConstructorOptions,
+  PointElement,
+  PointRenderOptions,
+  Type,
+} from "./types";
 
 interface Point {
   logicalX: number;
   logicalY: number;
   physicalX: number;
   physicalY: number;
-  arrow: Arrow;
+  element: PointElement;
 }
-
-export type Type = "ARROW" | "LINE";
 
 interface Options {
   el: HTMLCanvasElement;
   vx: string;
   vy: string;
-  arrowSpacing: number;
+  spacing: number;
   backgroundColor: string;
   foregroundColor: string;
   type: Type;
+  clamp: boolean;
+}
+
+// Converts X,Y slope to radians, in the format expected by
+// CanvasRenderingContext2D.rotate (starting at x=0)
+const slopeToRotation = (x: number, y: number): number =>
+  ((Math.PI * 2) + Math.atan2(-1 * y, x)) % (Math.PI * 2);
+
+function getPointConstructor(
+  pointType: Type,
+): new (options: PointConstructorOptions) => PointElement {
+  switch (pointType) {
+    case "ARROW":
+      return Arrow;
+    case "LINE":
+      return Line;
+    case "DOT":
+      return Dot;
+    case "DEBUG":
+      return Debug;
+  }
 }
 
 export default class VFCanvas {
@@ -29,21 +54,21 @@ export default class VFCanvas {
   private width: number;
   private height: number;
 
+  private xEquation: string;
+  private yEquation: string;
   private backgroundColor: string;
   private foregroundColor: string;
   private type: Type;
+  private clamp: boolean;
+  private spacing: number;
 
   private points: Point[] = [];
-  private arrowSpacing: number;
 
   private logicalMouseX: number = 0;
   private logicalMouseY: number = 0;
 
-  private xEquation: string;
-  private yEquation: string;
-
   constructor(
-    { el, vx, vy, arrowSpacing, foregroundColor, backgroundColor, type }:
+    { el, vx, vy, spacing, foregroundColor, backgroundColor, type, clamp }:
       Options,
   ) {
     this.el = el;
@@ -61,7 +86,8 @@ export default class VFCanvas {
     this.ctx = ctx;
     this.xEquation = vx;
     this.yEquation = vy;
-    this.arrowSpacing = arrowSpacing;
+    this.spacing = spacing;
+    this.clamp = clamp;
 
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
@@ -83,12 +109,19 @@ export default class VFCanvas {
     );
   };
 
-  private getArrowProperties(
+  private getPointElementProperties(
     point: Point,
-  ): { magnitude: number; direction: number } {
+  ): PointRenderOptions {
     const evaluate = (equation: string): number => {
       const time = (Date.now() / 10000) % 1;
-      const f = new Function("x", "y", "mX", "mY", "t", `return ${equation};`);
+      const f = new Function(
+        "x",
+        "y",
+        "mX",
+        "mY",
+        "t",
+        `with (Math) { return ${equation}; }`,
+      );
       return f(
         point.logicalX,
         point.logicalY,
@@ -100,12 +133,17 @@ export default class VFCanvas {
 
     const x = evaluate(this.xEquation);
     const y = evaluate(this.yEquation);
-    const magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) *
-      this.arrowSpacing;
+    let logicalMagnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+    if (this.clamp) {
+      logicalMagnitude = Math.min(logicalMagnitude, 1);
+    }
+
+    const physicalMagintude = logicalMagnitude * this.spacing;
 
     return {
-      magnitude,
-      direction: slopeToRadians(x, y),
+      magnitude: physicalMagintude,
+      direction: slopeToRotation(x, y),
     };
   }
 
@@ -114,7 +152,8 @@ export default class VFCanvas {
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
-      point.arrow.render(this.getArrowProperties(point));
+      point.element.render(this.getPointElementProperties(point));
+      this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
     requestAnimationFrame(this.render);
@@ -183,19 +222,21 @@ export default class VFCanvas {
     for (
       let physicalX = pMinX;
       physicalX < pMaxX;
-      physicalX += this.arrowSpacing
+      physicalX += this.spacing
     ) {
       for (
         let physicalY = pMinY;
         physicalY < pMaxY;
-        physicalY += this.arrowSpacing
+        physicalY += this.spacing
       ) {
-        const arrow = new Arrow({
+        const ctr = getPointConstructor(this.type);
+
+        const element = new ctr({
           ctx: this.ctx,
           x: physicalX,
           y: physicalY,
           color: this.foregroundColor,
-          showArrow: this.type === "ARROW",
+          type: this.type,
         });
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,
@@ -203,7 +244,7 @@ export default class VFCanvas {
         );
 
         this.points.push({
-          arrow,
+          element,
           logicalX,
           logicalY,
           physicalX,

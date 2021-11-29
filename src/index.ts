@@ -1,4 +1,5 @@
-import VFCanvas, { Type } from "./canvas";
+import VFCanvas from "./canvas";
+import { Type } from "./types";
 
 const canvas = document.querySelector(".app-canvas") as
   | HTMLCanvasElement
@@ -18,16 +19,19 @@ const foregroundColor = params.get("fg") || "#fff";
 const type = params.get("type") as Type || "ARROW";
 
 const lValue = params.get("l");
-const arrowSpacing = lValue ? parseInt(lValue, 10) : 40;
+const spacing = lValue ? parseInt(lValue, 10) : 40;
+
+const clamp = params.get("clamp") === "true";
 
 new VFCanvas({
   el: canvas,
   vx,
   vy,
-  arrowSpacing,
+  spacing,
   foregroundColor,
   backgroundColor,
   type,
+  clamp,
 });
 
 const showConfig = window.location.search === "" ||
