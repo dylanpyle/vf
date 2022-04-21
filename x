@@ -23,7 +23,7 @@ cmd:check() {
 
 cmd:build() {
   cmd:copy_static
-  yarn run esbuild src/index.ts --bundle --minify --outfile=dist/index.js
+  yarn run esbuild src/lib.ts src/demo.ts --bundle --minify --outdir=dist
 }
 
 _stop_fswatch() {
@@ -38,11 +38,11 @@ cmd:dev() {
   fswatch -o src/static | xargs -n1 ./x copy_static &
   FSWATCH_PID=$!
 
-  yarn run esbuild src/index.ts \
+  yarn run esbuild src/lib.ts src/demo.ts \
     --servedir=dist \
     --bundle \
     --sourcemap \
-    --outfile=dist/index.js \
+    --outdir=dist \
     --serve=localhost:8080
 }
 

@@ -20,8 +20,8 @@ interface Point {
 
 interface Options {
   el: HTMLCanvasElement;
-  vx: string;
-  vy: string;
+  xEquation: string;
+  yEquation: string;
   spacing: number;
   backgroundColor: string;
   foregroundColor: string;
@@ -52,45 +52,35 @@ function getPointConstructor(
 }
 
 export default class VFCanvas {
-  private el: HTMLCanvasElement;
+  private options: Options;
   private ctx: CanvasRenderingContext2D;
   private width: number;
   private height: number;
-
-  private xEquation: string;
-  private yEquation: string;
-  private backgroundColor: string;
-  private foregroundColor: string;
-  private type: Type;
-  private clamp: boolean;
-  private spacing: number;
+  private pageOffsetX: number;
+  private pageOffsetY: number;
 
   private points: Point[] = [];
 
   private logicalMouseX: number = 0;
   private logicalMouseY: number = 0;
 
-  constructor(
-    { el, vx, vy, spacing, foregroundColor, backgroundColor, type, clamp }:
-      Options,
-  ) {
-    this.el = el;
-    const ctx = el.getContext("2d");
-    this.width = this.el.clientWidth;
-    this.height = this.el.clientHeight;
-    this.backgroundColor = backgroundColor;
-    this.foregroundColor = foregroundColor;
-    this.type = type;
+  constructor(options: Options) {
+    const { el } = options;
+    this.options = options;
+    const ctx = options.el.getContext("2d");
 
     if (!ctx) {
       throw new Error("Could not get canvas context");
     }
 
     this.ctx = ctx;
-    this.xEquation = vx;
-    this.yEquation = vy;
-    this.spacing = spacing;
-    this.clamp = clamp;
+
+    // These values are definitively set in `setUpScene`, there's just no way to
+    // tell the compiler that AFAIK.
+    this.pageOffsetX = 0;
+    this.pageOffsetY = 0;
+    this.width = 1;
+    this.height = 1;
 
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
@@ -101,14 +91,14 @@ export default class VFCanvas {
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    this.updateWithMousePosition(event.clientX, event.clientY);
+    this.updateWithMousePosition(event.offsetX, event.offsetY);
   };
 
   private onTouchMove = (event: TouchEvent) => {
     event.preventDefault();
     this.updateWithMousePosition(
-      event.touches[0].clientX,
-      event.touches[0].clientY,
+      event.touches[0].pageX - this.pageOffsetX,
+      event.touches[0].pageY - this.pageOffsetY,
     );
   };
 
@@ -134,15 +124,15 @@ export default class VFCanvas {
       );
     };
 
-    const x = evaluate(this.xEquation);
-    const y = evaluate(this.yEquation);
+    const x = evaluate(this.options.xEquation);
+    const y = evaluate(this.options.yEquation);
     let logicalMagnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
-    if (this.clamp) {
+    if (this.options.clamp) {
       logicalMagnitude = Math.min(logicalMagnitude, 1);
     }
 
-    const physicalMagintude = logicalMagnitude * this.spacing;
+    const physicalMagintude = logicalMagnitude * this.options.spacing;
 
     return {
       magnitude: physicalMagintude,
@@ -151,7 +141,7 @@ export default class VFCanvas {
   }
 
   private render = () => {
-    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillStyle = this.options.backgroundColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     for (const point of this.points) {
@@ -207,40 +197,61 @@ export default class VFCanvas {
   }
 
   private setUpScene() {
-    this.width = this.el.clientWidth;
-    this.height = this.el.clientHeight;
+    const { el } = this.options;
+    const parentNode = el.parentNode;
+
+    if (!parentNode || !(parentNode instanceof HTMLElement)) {
+      throw new Error("Parent element must be a HTMLElement");
+    }
+
+    const parentSize = parentNode.getBoundingClientRect();
+
+    this.width = parentSize.width;
+    this.height = parentSize.height;
+    this.pageOffsetX = parentSize.x;
+    this.pageOffsetY = parentSize.y;
 
     const scale = window.devicePixelRatio;
 
-    this.el.width = this.width * scale;
-    this.el.height = this.height * scale;
+    el.width = this.width * scale;
+    el.height = this.height * scale;
 
     this.ctx.scale(scale, scale);
 
     this.points = [];
 
-    const [pMinX, pMinY] = [0, 0];
-    const [pMaxX, pMaxY] = [this.width, this.height];
+    const halfPoint = this.options.spacing / 2;
+
+    const widthWhitespace = (this.width % this.options.spacing) / 2;
+
+    const [pMinX, pMinY] = [halfPoint + widthWhitespace, halfPoint];
+
+    // Unclear why this is off by 1 but it is. Sorry!
+    const [pMaxX, pMaxY] = [
+      this.width - halfPoint + 1,
+      this.height - halfPoint,
+    ];
 
     for (
       let physicalX = pMinX;
       physicalX < pMaxX;
-      physicalX += this.spacing
+      physicalX += this.options.spacing
     ) {
       for (
         let physicalY = pMinY;
         physicalY < pMaxY;
-        physicalY += this.spacing
+        physicalY += this.options.spacing
       ) {
-        const ctr = getPointConstructor(this.type);
+        const ctr = getPointConstructor(this.options.type);
 
         const element = new ctr({
           ctx: this.ctx,
           x: physicalX,
           y: physicalY,
-          color: this.foregroundColor,
-          type: this.type,
+          color: this.options.foregroundColor,
+          type: this.options.type,
         });
+
         const [logicalX, logicalY] = this.physicalToLogical(
           physicalX,
           physicalY,
@@ -257,3 +268,5 @@ export default class VFCanvas {
     }
   }
 }
+
+(window as any).VFCanvas = VFCanvas;

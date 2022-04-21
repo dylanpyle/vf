@@ -1,4 +1,4 @@
-import VFCanvas from "./canvas";
+import VFCanvas from "./lib";
 import { Type } from "./types";
 
 const canvas = document.querySelector(".app-canvas") as
@@ -11,8 +11,8 @@ if (!canvas) {
 
 const url = new URL(window.location.href);
 const params = url.searchParams;
-const vx = params.get("vx") || "Math.cos((y - mY + 0.78) * 2)";
-const vy = params.get("vy") || "Math.sin((x - mX) * 2)";
+const xEquation = params.get("vx") || "Math.cos((y - mY + 0.78) * 2)";
+const yEquation = params.get("vy") || "Math.sin((x - mX) * 2)";
 
 const backgroundColor = params.get("bg") || "#000";
 const foregroundColor = params.get("fg") || "#fff";
@@ -25,8 +25,8 @@ const clamp = params.get("clamp") === "true";
 
 new VFCanvas({
   el: canvas,
-  vx,
-  vy,
+  xEquation,
+  yEquation,
   spacing,
   foregroundColor,
   backgroundColor,

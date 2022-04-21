@@ -21,6 +21,7 @@ export default class Arrow implements PointElement {
   public render({ magnitude, direction }: PointRenderOptions) {
     const { ctx } = this;
 
+    // Arrow
     const originX = -1 * (magnitude / 2);
     const endX = originX + magnitude;
 
