@@ -1,4 +1,4 @@
-export type Type = "ARROW" | "LINE" | "DOT" | "DEBUG";
+export type Type = "ARROW" | "LINE" | "DOT" | "CIRCLE" | "DEBUG";
 
 export interface PointConstructorOptions {
   ctx: CanvasRenderingContext2D;

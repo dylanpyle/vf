@@ -4,7 +4,7 @@ import {
   PointRenderOptions,
 } from "../types";
 
-export default class Dot implements PointElement {
+export default class Circle implements PointElement {
   private ctx: CanvasRenderingContext2D;
   private x: number;
   private y: number;
@@ -24,8 +24,8 @@ export default class Dot implements PointElement {
     ctx.arc(this.x, this.y, magnitude / 2, 0, Math.PI * 2);
 
     ctx.closePath();
-    ctx.fillStyle = `HSL(${direction}rad, 70%, 60%)`;
-    ctx.fill();
+    ctx.strokeStyle = `HSL(${direction}rad, 70%, 60%)`;
+    ctx.stroke();
 
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);

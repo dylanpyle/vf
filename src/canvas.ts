@@ -1,6 +1,7 @@
 import Arrow from "./points/arrow";
 import Line from "./points/line";
 import Dot from "./points/dot";
+import Circle from "./points/circle";
 import Debug from "./points/debug";
 import {
   PointConstructorOptions,
@@ -43,6 +44,8 @@ function getPointConstructor(
       return Line;
     case "DOT":
       return Dot;
+    case "CIRCLE":
+      return Circle;
     case "DEBUG":
       return Debug;
   }
