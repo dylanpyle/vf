@@ -1,5 +1,5 @@
 import VFCanvas from "./lib";
-import { Type } from "./types";
+import { PointType } from "./types";
 
 const canvas = document.querySelector(".app-canvas") as
   | HTMLCanvasElement
@@ -11,28 +11,31 @@ if (!canvas) {
 
 const url = new URL(window.location.href);
 const params = url.searchParams;
-const xEquation = params.get("vx") || "Math.cos((y - mY + 0.78) * 2)";
-const yEquation = params.get("vy") || "Math.sin((x - mX) * 2)";
 
-const backgroundColor = params.get("bg") || "#000";
-const foregroundColor = params.get("fg") || "#fff";
-const type = params.get("type") as Type || "ARROW";
+const inputs = {
+  vx: params.get("vx") || "(mX - x) * sin((2*t - 1) * PI)",
+  vy: params.get("vy") || "(mY - y) * cos((2*t - 1) * PI)",
+  bg: params.get("bg") || "#dd5555",
+  fg: params.get("fg") || "#fff",
+  type: params.get("type") as PointType || "DOT",
+  l: params.get("l") || 40,
+  clamp: params.get("clamp"),
+} as { [key: string]: string };
 
-const lValue = params.get("l");
-const spacing = lValue ? parseInt(lValue, 10) : 40;
+const clamp = inputs.clamp ? parseFloat(inputs.clamp) : undefined;
 
-const clamp = params.get("clamp") === "true";
-
-new VFCanvas({
+const vf = new VFCanvas({
   el: canvas,
-  xEquation,
-  yEquation,
-  spacing,
-  foregroundColor,
-  backgroundColor,
-  type,
+  xEquation: inputs.vx,
+  yEquation: inputs.vy,
+  spacing: parseInt(inputs.l, 10),
+  foregroundColor: inputs.fg,
+  backgroundColor: inputs.bg,
+  type: inputs.type as PointType,
   clamp,
 });
+
+vf.start();
 
 const showConfig = window.location.search === "" ||
   params.get("edit") === "true";
@@ -46,7 +49,8 @@ if (showConfig) {
     throw new Error("Missing .config-form element");
   }
 
-  for (const [key, value] of params) {
+  for (const key of Object.keys(inputs)) {
+    const value = inputs[key];
     const formElement = configForm.elements.namedItem(key) as
       | HTMLInputElement
       | HTMLSelectElement

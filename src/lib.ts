@@ -1,13 +1,12 @@
 import Arrow from "./points/arrow";
 import Line from "./points/line";
 import Dot from "./points/dot";
-import Circle from "./points/circle";
 import Debug from "./points/debug";
 import {
   PointConstructorOptions,
   PointElement,
   PointRenderOptions,
-  Type,
+  PointType,
 } from "./types";
 
 interface Point {
@@ -19,14 +18,36 @@ interface Point {
 }
 
 interface Options {
+  // The <canvas> element to render the point field in
   el: HTMLCanvasElement;
+
+  // JavaScript equations to be evaluated to calculate the X and Y components of
+  // the vector. Should generally return values in the range (-1,1).
+  //
+  // Several variables are provided in scope:
+  // - `x`, `y` — the vector's X and Y position in the field (-1 to 1)
+  // - `mX`, `mY` — the logical position of the mouse in the field (-1 to 1)
+  // - `t` — A continuous value growing from 0 to 1 over `timerPeriodMs`
+  // — and all `Math` functions.
   xEquation: string;
   yEquation: string;
+
+  // Pixel distance between points in the field.
   spacing: number;
+
+  // HTML color strings
   backgroundColor: string;
   foregroundColor: string;
-  type: Type;
-  clamp: boolean;
+
+  // See valid values
+  type: PointType;
+
+  // Restrict the absolute magnitude of the vector, e.g. to `1` to prevent
+  // vectors exceeding their allowed space.
+  clamp?: number;
+
+  // Period over which the `t` variable grows from 0 to 1.
+  timerPeriodMs?: number;
 }
 
 // Converts X,Y slope to radians, in the format expected by
@@ -35,7 +56,7 @@ const slopeToRotation = (x: number, y: number): number =>
   ((Math.PI * 2) + Math.atan2(-1 * y, x)) % (Math.PI * 2);
 
 function getPointConstructor(
-  pointType: Type,
+  pointType: PointType,
 ): new (options: PointConstructorOptions) => PointElement {
   switch (pointType) {
     case "ARROW":
@@ -43,15 +64,16 @@ function getPointConstructor(
     case "LINE":
       return Line;
     case "DOT":
-      return Dot;
     case "CIRCLE":
-      return Circle;
+      return Dot;
     case "DEBUG":
       return Debug;
   }
 }
 
-export default class VFCanvas {
+const DEFAULT_TIMER_PERIOD_MS = 30000;
+
+export default class VFCanvas extends EventTarget {
   private options: Options;
   private ctx: CanvasRenderingContext2D;
   private width: number;
@@ -65,6 +87,7 @@ export default class VFCanvas {
   private logicalMouseY: number = 0;
 
   constructor(options: Options) {
+    super();
     const { el } = options;
     this.options = options;
     const ctx = options.el.getContext("2d");
@@ -85,7 +108,9 @@ export default class VFCanvas {
     el.addEventListener("mousemove", this.onMouseMove);
     el.addEventListener("touchmove", this.onTouchMove);
     window.addEventListener("resize", this.onWindowResize);
+  }
 
+  public start(): void {
     this.setUpScene();
     this.render();
   }
@@ -106,7 +131,10 @@ export default class VFCanvas {
     point: Point,
   ): PointRenderOptions {
     const evaluate = (equation: string): number => {
-      const time = (Date.now() / 10000) % 1;
+      const timerPeriodMs = this.options.timerPeriodMs ||
+        DEFAULT_TIMER_PERIOD_MS;
+      const time = (Date.now() / timerPeriodMs) % 1;
+
       const f = new Function(
         "x",
         "y",
@@ -128,8 +156,8 @@ export default class VFCanvas {
     const y = evaluate(this.options.yEquation);
     let logicalMagnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
-    if (this.options.clamp) {
-      logicalMagnitude = Math.min(logicalMagnitude, 1);
+    if (this.options.clamp !== undefined) {
+      logicalMagnitude = Math.min(logicalMagnitude, this.options.clamp);
     }
 
     const physicalMagintude = logicalMagnitude * this.options.spacing;
@@ -222,9 +250,14 @@ export default class VFCanvas {
 
     const halfPoint = this.options.spacing / 2;
 
-    const widthWhitespace = (this.width % this.options.spacing) / 2;
+    const horizontalPadding = (this.width % this.options.spacing) / 2;
 
-    const [pMinX, pMinY] = [halfPoint + widthWhitespace, halfPoint];
+    const sizeChangedEvent = new CustomEvent("sizeChanged", {
+      detail: { horizontalPadding },
+    });
+    this.dispatchEvent(sizeChangedEvent);
+
+    const [pMinX, pMinY] = [halfPoint + horizontalPadding, halfPoint];
 
     // Unclear why this is off by 1 but it is. Sorry!
     const [pMaxX, pMaxY] = [

@@ -1,11 +1,11 @@
-export type Type = "ARROW" | "LINE" | "DOT" | "CIRCLE" | "DEBUG";
+export type PointType = "ARROW" | "LINE" | "DOT" | "CIRCLE" | "DEBUG";
 
 export interface PointConstructorOptions {
   ctx: CanvasRenderingContext2D;
   x: number;
   y: number;
   color: string;
-  type: Type;
+  type: PointType;
 }
 
 export interface PointRenderOptions {

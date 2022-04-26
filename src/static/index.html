@@ -13,7 +13,7 @@
           vX
           (<a href='https://github.com/dylanpyle/vf#writing-equations'>?</a>):
         </div>
-        <input type='text' placeholder='mX-x' name='vx' />
+        <input type='text' name='vx' />
       </label>
 
       <label>
@@ -21,27 +21,27 @@
           vY
           (<a href='https://github.com/dylanpyle/vf#writing-equations'>?</a>):
         </div>
-        <input type='text' placeholder='mY-y' name='vy' />
+        <input type='text' name='vy' />
       </label>
 
       <label>
         <div class='label-text'>Background:</div>
-        <input type='color' name='bg' value='#000000' />
+        <input type='color' name='bg' />
       </label>
 
       <label>
         <div class='label-text'>Foreground:</div>
-        <input type='color' name='fg' value='#ffffff' />
+        <input type='color' name='fg' />
       </label>
 
       <label>
         <div class='label-text'>Arrow spacing:</div>
-        <input type='number' placeholder='40' name='l' />
+        <input type='number' name='l' />
       </label>
 
       <label>
         <div class='label-text'>Style:</div>
-        <select name='type' value='ARROW'>
+        <select name='type'>
           <option value='ARROW'>Arrow</option>
           <option value='LINE'>Line</option>
           <option value='DOT'>Dot</option>
@@ -52,10 +52,7 @@
 
       <label>
         <div class='label-text'>Clamp:</div>
-        <select name='clamp' value='false'>
-          <option value='false'>Off</option>
-          <option value='true'>On</option>
-        </select>
+        <input type='number' step='0.01' placeholder='1' name='clamp' />
       </label>
 
       <fieldset class='actions'>
