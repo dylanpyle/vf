@@ -1,4 +1,19 @@
-export type PointType = "ARROW" | "LINE" | "DOT" | "CIRCLE" | "DEBUG";
+export type PointType =
+  | "ARROW"
+  | "LINE"
+  | "SPACETIME"
+  | "DOT"
+  | "CIRCLE"
+  | "EYE"
+  | "DEBUG";
+
+export interface Point {
+  logicalX: number;
+  logicalY: number;
+  physicalX: number;
+  physicalY: number;
+  element: PointElement;
+}
 
 export interface PointConstructorOptions {
   ctx: CanvasRenderingContext2D;
@@ -6,6 +21,9 @@ export interface PointConstructorOptions {
   y: number;
   color: string;
   type: PointType;
+  spacing: number;
+  pointsArray: Point[];
+  pointsArrayIndex: number;
 }
 
 export interface PointRenderOptions {

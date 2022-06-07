@@ -2,6 +2,7 @@ import {
   PointConstructorOptions,
   PointElement,
   PointRenderOptions,
+  PointType,
 } from "../types";
 
 export default class Arrow implements PointElement {
@@ -9,19 +10,21 @@ export default class Arrow implements PointElement {
   private x: number;
   private y: number;
   private color: string;
+  private type: PointType;
 
-  constructor({ ctx, x, y, color }: PointConstructorOptions) {
+  constructor({ ctx, x, y, color, type }: PointConstructorOptions) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
     this.color = color;
+    this.type = type;
   }
 
   public render({ magnitude, direction }: PointRenderOptions) {
     const { ctx } = this;
 
-    // Arrow
+    // Line
     const originX = -1 * (magnitude / 2);
     const endX = originX + magnitude;
 
@@ -33,11 +36,13 @@ export default class Arrow implements PointElement {
     ctx.lineTo(originX, 0);
     ctx.lineTo(endX, 0);
 
-    // Arrowhead
-    ctx.moveTo(endX, 0);
-    ctx.lineTo(endX - 7, -3);
-    ctx.moveTo(endX, 0);
-    ctx.lineTo(endX - 7, 3);
+    if (this.type === "ARROW") {
+      // Arrowhead
+      ctx.moveTo(endX, 0);
+      ctx.lineTo(endX - 7, -3);
+      ctx.moveTo(endX, 0);
+      ctx.lineTo(endX - 7, 3);
+    }
 
     ctx.closePath();
     ctx.strokeStyle = this.color;

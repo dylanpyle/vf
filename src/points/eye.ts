@@ -4,18 +4,20 @@ import {
   PointRenderOptions,
 } from "../types";
 
-export default class Line implements PointElement {
+export default class Eye implements PointElement {
   private ctx: CanvasRenderingContext2D;
   private x: number;
   private y: number;
   private color: string;
+  private spacing: number;
 
-  constructor({ ctx, x, y, color }: PointConstructorOptions) {
+  constructor({ ctx, x, y, color, spacing }: PointConstructorOptions) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
     this.color = color;
+    this.spacing = spacing;
   }
 
   public render({ magnitude, direction }: PointRenderOptions) {
@@ -25,16 +27,20 @@ export default class Line implements PointElement {
     const endX = originX + magnitude;
 
     ctx.translate(this.x, this.y);
-    ctx.rotate(direction);
+    ctx.strokeStyle = this.color;
+    ctx.fillStyle = this.color;
 
     ctx.beginPath();
-
-    ctx.lineTo(originX, 0);
-    ctx.lineTo(endX, 0);
-
+    ctx.arc(0, 0, this.spacing / 2, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.strokeStyle = this.color;
     ctx.stroke();
+
+    ctx.beginPath();
+    ctx.rotate(direction);
+    ctx.moveTo(endX, 0);
+    ctx.arc(0, 0, magnitude, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
 
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);

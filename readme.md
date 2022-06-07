@@ -2,7 +2,9 @@
 
 # vf
 
-A vector field and visual effect playground.
+[v]isual e[f]fects /
+[v]ector [f]ields /
+[v]ery [f]un
 
 ## Demo
 

@@ -1,21 +1,16 @@
 import Arrow from "./points/arrow";
-import Line from "./points/line";
 import Dot from "./points/dot";
+import Spacetime from "./points/spacetime";
 import Debug from "./points/debug";
+import Eye from "./points/eye";
+
 import {
+  Point,
   PointConstructorOptions,
   PointElement,
   PointRenderOptions,
   PointType,
 } from "./types";
-
-interface Point {
-  logicalX: number;
-  logicalY: number;
-  physicalX: number;
-  physicalY: number;
-  element: PointElement;
-}
 
 interface Options {
   // The <canvas> element to render the point field in
@@ -48,6 +43,10 @@ interface Options {
 
   // Period over which the `t` variable grows from 0 to 1.
   timerPeriodMs?: number;
+
+  // In pixels
+  horizontalPadding: number;
+  verticalPadding: number;
 }
 
 // Converts X,Y slope to radians, in the format expected by
@@ -60,12 +59,15 @@ function getPointConstructor(
 ): new (options: PointConstructorOptions) => PointElement {
   switch (pointType) {
     case "ARROW":
-      return Arrow;
     case "LINE":
-      return Line;
+      return Arrow;
     case "DOT":
     case "CIRCLE":
       return Dot;
+    case "SPACETIME":
+      return Spacetime;
+    case "EYE":
+      return Eye;
     case "DEBUG":
       return Debug;
   }
@@ -80,6 +82,7 @@ export default class VFCanvas extends EventTarget {
   private height: number;
   private pageOffsetX: number;
   private pageOffsetY: number;
+  private animationLoop: number | null = null;
 
   private points: Point[] = [];
 
@@ -88,7 +91,6 @@ export default class VFCanvas extends EventTarget {
 
   constructor(options: Options) {
     super();
-    const { el } = options;
     this.options = options;
     const ctx = options.el.getContext("2d");
 
@@ -98,21 +100,29 @@ export default class VFCanvas extends EventTarget {
 
     this.ctx = ctx;
 
-    // These values are definitively set in `setUpScene`, there's just no way to
-    // tell the compiler that AFAIK.
     this.pageOffsetX = 0;
     this.pageOffsetY = 0;
     this.width = 1;
     this.height = 1;
-
-    el.addEventListener("mousemove", this.onMouseMove);
-    el.addEventListener("touchmove", this.onTouchMove);
-    window.addEventListener("resize", this.onWindowResize);
   }
 
   public start(): void {
     this.setUpScene();
     this.render();
+
+    this.options.el.addEventListener("mousemove", this.onMouseMove);
+    this.options.el.addEventListener("touchmove", this.onTouchMove);
+    window.addEventListener("resize", this.onWindowResize);
+  }
+
+  public stop(): void {
+    this.options.el.removeEventListener("mousemove", this.onMouseMove);
+    this.options.el.removeEventListener("touchmove", this.onTouchMove);
+    window.removeEventListener("resize", this.onWindowResize);
+
+    if (this.animationLoop) {
+      cancelAnimationFrame(this.animationLoop);
+    }
   }
 
   private onMouseMove = (event: MouseEvent) => {
@@ -177,7 +187,7 @@ export default class VFCanvas extends EventTarget {
       this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
-    requestAnimationFrame(this.render);
+    this.animationLoop = requestAnimationFrame(this.render);
   };
 
   private updateWithMousePosition = (
@@ -250,19 +260,27 @@ export default class VFCanvas extends EventTarget {
 
     const halfPoint = this.options.spacing / 2;
 
-    const horizontalPadding = (this.width % this.options.spacing) / 2;
+    const { horizontalPadding, verticalPadding } = this.options;
+
+    const additionalCenteringPadding =
+      ((this.width - (horizontalPadding * 2)) % this.options.spacing) / 2;
+    const totalHorizontalPadding = horizontalPadding +
+      additionalCenteringPadding;
 
     const sizeChangedEvent = new CustomEvent("sizeChanged", {
-      detail: { horizontalPadding },
+      detail: { horizontalPadding: totalHorizontalPadding },
     });
     this.dispatchEvent(sizeChangedEvent);
 
-    const [pMinX, pMinY] = [halfPoint + horizontalPadding, halfPoint];
+    const [pMinX, pMinY] = [
+      halfPoint + totalHorizontalPadding,
+      halfPoint + verticalPadding,
+    ];
 
     // Unclear why this is off by 1 but it is. Sorry!
     const [pMaxX, pMaxY] = [
-      this.width - halfPoint + 1,
-      this.height - halfPoint,
+      this.width - halfPoint - totalHorizontalPadding + 1,
+      this.height - halfPoint - verticalPadding,
     ];
 
     for (
@@ -283,6 +301,9 @@ export default class VFCanvas extends EventTarget {
           y: physicalY,
           color: this.options.foregroundColor,
           type: this.options.type,
+          spacing: this.options.spacing,
+          pointsArray: this.points,
+          pointsArrayIndex: this.points.length,
         });
 
         const [logicalX, logicalY] = this.physicalToLogical(

@@ -1,22 +1,29 @@
 import {
+  Point,
   PointConstructorOptions,
   PointElement,
   PointRenderOptions,
-  PointType,
 } from "../types";
 
 export default class Dot implements PointElement {
   private ctx: CanvasRenderingContext2D;
   private x: number;
   private y: number;
-  private type: PointType;
+  private spacing: number;
+  private pointsArray: Point[];
+  private pointsArrayIndex: number;
 
-  constructor({ ctx, x, y, type }: PointConstructorOptions) {
+  constructor(
+    { ctx, x, y, spacing, pointsArray, pointsArrayIndex }:
+      PointConstructorOptions,
+  ) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
-    this.type = type;
+    this.spacing = spacing;
+    this.pointsArray = pointsArray;
+    this.pointsArrayIndex = pointsArrayIndex;
   }
 
   public render({ magnitude, direction }: PointRenderOptions) {
@@ -25,23 +32,15 @@ export default class Dot implements PointElement {
     ctx.beginPath();
     ctx.translate(this.x, this.y);
 
+    ctx.rotate(direction);
+    ctx.translate(this.spacing / 2, this.spacing / 2);
+
     ctx.arc(0, 0, magnitude / 2, 0, Math.PI * 2);
 
     ctx.closePath();
 
-    switch (this.type) {
-      case "DOT": {
-        ctx.fillStyle = `HSL(${direction}rad, 70%, 60%)`;
-        ctx.fill();
-        break;
-      }
-
-      case "CIRCLE": {
-        ctx.strokeStyle = `HSL(${direction}rad, 70%, 60%)`;
-        ctx.stroke();
-        break;
-      }
-    }
+    ctx.fillStyle = `HSL(${direction}rad, 70%, 60%)`;
+    ctx.fill();
 
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);

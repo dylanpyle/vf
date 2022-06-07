@@ -20,6 +20,8 @@ const inputs = {
   type: params.get("type") as PointType || "DOT",
   l: params.get("l") || 40,
   clamp: params.get("clamp"),
+  paddingX: params.get("paddingX") || 0,
+  paddingY: params.get("paddingY") || 0,
 } as { [key: string]: string };
 
 const clamp = inputs.clamp ? parseFloat(inputs.clamp) : undefined;
@@ -33,6 +35,8 @@ const vf = new VFCanvas({
   backgroundColor: inputs.bg,
   type: inputs.type as PointType,
   clamp,
+  horizontalPadding: parseInt(inputs.paddingX, 10),
+  verticalPadding: parseInt(inputs.paddingY, 10),
 });
 
 vf.start();
