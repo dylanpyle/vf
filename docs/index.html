@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <title>vf</title>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='style.css'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+  </head>
+  <body>
+    <form class='config-form' action='/'>
+      <label>
+        <div class='label-text'>
+          vX
+          (<a href='https://github.com/dylanpyle/vf#writing-equations'>?</a>):
+        </div>
+        <input type='text' name='vx' />
+      </label>
+
+      <label>
+        <div class='label-text'>
+          vY
+          (<a href='https://github.com/dylanpyle/vf#writing-equations'>?</a>):
+        </div>
+        <input type='text' name='vy' />
+      </label>
+
+      <label>
+        <div class='label-text'>Background:</div>
+        <input type='color' name='bg' />
+      </label>
+
+      <label>
+        <div class='label-text'>Foreground:</div>
+        <input type='color' name='fg' />
+      </label>
+
+      <label>
+        <div class='label-text'>Arrow spacing:</div>
+        <input type='number' name='l' />
+      </label>
+
+      <label>
+        <div class='label-text'>Style:</div>
+        <select name='type'>
+          <option value='ARROW'>Arrow</option>
+          <option value='LINE'>Line</option>
+          <option value='DOT'>Dot</option>
+          <option value='SPACETIME'>Spacetime</option>
+          <option value='CIRCLE'>Circle</option>
+          <option value='EYE'>Eye</option>
+          <option value='DEBUG'>(debug mode)</option>
+        </select>
+      </label>
+
+      <label>
+        <div class='label-text'>Clamp:</div>
+        <input type='number' step='0.01' placeholder='1' name='clamp' />
+      </label>
+
+      <fieldset class='actions'>
+        <button name='edit' value='true' type='submit'>Update</button>
+        <button name='edit' value='false' type='submit' class='done-button'>Done</button>
+      </fieldset>
+    </form>
+
+    <canvas class='app-canvas'></canvas>
+    <script src='demo.js'></script>
+  </body>
+</html>
