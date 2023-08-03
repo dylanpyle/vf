@@ -4,37 +4,38 @@ import {
   PointRenderOptions,
 } from "../types";
 
-export default class Dot implements PointElement {
+export default class ThickLine implements PointElement {
   private ctx: CanvasRenderingContext2D;
   private x: number;
   private y: number;
-  private spacing: number;
+  private color: string;
 
-  constructor(
-    { ctx, x, y, spacing }: PointConstructorOptions,
-  ) {
+  constructor({ ctx, x, y, color }: PointConstructorOptions) {
     this.ctx = ctx;
 
     this.x = x;
     this.y = y;
-    this.spacing = spacing;
+    this.color = color;
   }
 
   public render({ magnitude, direction }: PointRenderOptions) {
     const { ctx } = this;
 
-    ctx.beginPath();
+    const originX = -8;
+    const endX = 8;
+
     ctx.translate(this.x, this.y);
-
     ctx.rotate(direction);
-    ctx.translate(this.spacing / 2, this.spacing / 2);
 
-    ctx.arc(0, 0, magnitude / 2, 0, Math.PI * 2);
+    ctx.beginPath();
+
+    ctx.lineTo(originX, 0);
+    ctx.lineTo(endX, 0);
 
     ctx.closePath();
-
-    ctx.fillStyle = `HSL(${direction}rad, 70%, 60%)`;
-    ctx.fill();
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = magnitude;
+    ctx.stroke();
 
     // Reset transformation
     ctx.setTransform(1, 0, 0, 1, 0, 0);

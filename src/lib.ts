@@ -1,8 +1,9 @@
 import Arrow from "./points/arrow";
+import Circle from "./points/circle";
 import Dot from "./points/dot";
 import Spacetime from "./points/spacetime";
 import Debug from "./points/debug";
-import Eye from "./points/eye";
+import ThickLine from "./points/thick-line";
 
 import {
   Point,
@@ -61,13 +62,15 @@ function getPointConstructor(
     case "ARROW":
     case "LINE":
       return Arrow;
+    case "THICKLINE":
+      return ThickLine;
     case "DOT":
-    case "CIRCLE":
       return Dot;
+    case "FILLED_CIRCLE":
+    case "OUTLINED_CIRCLE":
+      return Circle;
     case "SPACETIME":
       return Spacetime;
-    case "EYE":
-      return Eye;
     case "DEBUG":
       return Debug;
   }

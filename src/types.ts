@@ -1,10 +1,11 @@
 export type PointType =
   | "ARROW"
   | "LINE"
+  | "THICKLINE"
   | "SPACETIME"
+  | "FILLED_CIRCLE"
+  | "OUTLINED_CIRCLE"
   | "DOT"
-  | "CIRCLE"
-  | "EYE"
   | "DEBUG";
 
 export interface Point {
